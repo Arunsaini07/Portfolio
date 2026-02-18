@@ -326,8 +326,8 @@ const Hero = () => {
               whileHover={{ scale: 1.05 }}
               className="absolute -right-4 top-8 bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-xl border border-gray-100 dark:border-white/10"
             >
-              <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-indigo-600">2+</p>
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-tight">Years<br/>Experience</p>
+              <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-indigo-600">6+</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-tight">Months<br/>Experience</p>
             </motion.div>
 
             {/* Floating badge - Projects */}
@@ -338,7 +338,7 @@ const Hero = () => {
               whileHover={{ scale: 1.05 }}
               className="absolute -left-4 bottom-12 bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-xl border border-gray-100 dark:border-white/10"
             >
-              <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-indigo-600">20+</p>
+              <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-indigo-600">3+</p>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-tight">Projects<br/>Completed</p>
             </motion.div>
           </motion.div>

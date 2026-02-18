@@ -38,7 +38,7 @@ const Projects = () => {
       title: 'Faculty Hiring Portal',
       description:
         'Developed a full-stack web application to digitize and automate faculty hiring workflows, including online applications, document verification, approval tracking, and compliance checks.',
-      image: '/My-Portfolio/faculty.png',
+      image: 'faculty.png',
       techStack: [
         { icon: FaReact, name: 'React', color: 'text-blue-500' },
         { icon: SiTailwindcss, name: 'Tailwind', color: 'text-cyan-500' },
@@ -54,7 +54,7 @@ const Projects = () => {
       title: 'LabourHub',
       description:
         'LabourHub connects laborers with job providers. Workers can register and apply for jobs, while employers can post listings and hire suitable candidates.',
-      image: '/My-Portfolio/labour.png',
+      image: 'labour.png',
       techStack: [
         { icon: FaReact, name: 'React', color: 'text-blue-500' },
         { icon: FaCss3Alt, name: 'CSS3', color: 'text-blue-600' },
