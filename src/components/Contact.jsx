@@ -64,7 +64,7 @@ const Contact = () => {
         from_name: form.name,
         from_email: form.email,
         subject: form.subject,
-        message: form.message,
+        message: form.message + " " + form.name + " " + form.email,
       }, publicKey)
       .then(() => {
         setLoading(false)

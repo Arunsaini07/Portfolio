@@ -82,10 +82,10 @@ const Hero = () => {
   const springY = useSpring(mouseY, { stiffness: 50, damping: 20 })
 
   const socialLinks = [
-    { icon: FaLinkedin, href: '#', label: 'LinkedIn', color: 'hover:text-blue-600' },
-    { icon: FaGithub, href: '#', label: 'GitHub', color: 'hover:text-gray-900 dark:hover:text-white' },
-    { icon: MdEmail, href: '#', label: 'Email', color: 'hover:text-rose-500' },
-    { icon: FaInstagram, href: '#', label: 'Instagram', color: 'hover:text-pink-500' },
+    { icon: FaLinkedin, href: 'https://www.linkedin.com/in/arun8092/', label: 'LinkedIn', color: 'hover:text-blue-600' },
+    { icon: FaGithub, href: 'https://github.com/Arunsaini07', label: 'GitHub', color: 'hover:text-gray-900 dark:hover:text-white' },
+    { icon: MdEmail, href: 'https://leetcode.com/u/Arun8092/', label: 'Email', color: 'hover:text-rose-500' },
+    { icon: FaInstagram, href: 'https://www.instagram.com/arunsaini__07/', label: 'Instagram', color: 'hover:text-pink-500' },
   ]
 
   const handleMouseMove = (e) => {
@@ -200,15 +200,18 @@ const Hero = () => {
                 <motion.a
                   key={label}
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
                   whileHover={{ scale: 1.2, y: -4 }}
                   whileTap={{ scale: 0.9 }}
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
+
                   transition={{ delay: 0.8 + i * 0.1, type: 'spring', stiffness: 400 }}
                   className={`w-11 h-11 rounded-2xl bg-white dark:bg-gray-800 shadow-md border border-gray-100 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 ${color} transition-all duration-300 hover:shadow-lg hover:border-transparent`}
                 >
-                  <Icon size={18} />
+                  <Icon size={20} />
                 </motion.a>
               ))}
             </motion.div>
