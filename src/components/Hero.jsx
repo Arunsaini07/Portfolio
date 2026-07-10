@@ -161,9 +161,6 @@ const Hero = () => {
               <h1 className="text-6xl sm:text-7xl font-black leading-none tracking-tight">
                 <span className="text-gray-900 dark:text-white">Arun </span>
                 <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-pink-500 to-indigo-600">
-                  Saini
-                </span>
               </h1>
             </motion.div>
 
