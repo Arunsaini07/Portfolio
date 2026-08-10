@@ -216,7 +216,6 @@ const Hero = () => {
             {/* CTA Buttons */}
             <motion.div variants={item} className="flex flex-wrap gap-4">
               <motion.a
-                href="https://drive.google.com/file/d/1TTZyNGN8-lvkIPYlMwcxXWGaNu8EUEc_/view?usp=sharing"
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.04 }}
