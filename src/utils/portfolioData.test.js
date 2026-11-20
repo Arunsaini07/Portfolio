@@ -31,6 +31,14 @@ test('filterProjects returns all projects for All and narrows by category', () =
   const dataAnalytics = filterProjects(PROJECTS, 'Data & Analytics')
   assert.equal(dataAnalytics.length, 1)
   assert.equal(dataAnalytics[0].id, 'gurgaon-real-estate-analysis')
+  assert.equal(
+    dataAnalytics[0].directUrl,
+    'https://github.com/Arunsaini07/data-analysis-/blob/main/project/main.py'
+  )
+  assert.equal(
+    dataAnalytics[0].githubLink,
+    'https://github.com/Arunsaini07/data-analysis-/blob/main/project/main.py'
+  )
 })
 
 test('filterSkillsByDomain filters accurately across domains', () => {

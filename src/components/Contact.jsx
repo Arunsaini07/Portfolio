@@ -17,7 +17,7 @@ const Contact = () => {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
   const [fieldErrors, setFieldErrors] = useState({})
   const [loading, setLoading] = useState(false)
-  const [status, setStatus] = useState({ type: '', message: '' })
+  const [status, setStatus] = useState({ type: '', message: '', showMailto: false })
   const sectionRef = useRef(null)
 
   const { scrollYProgress } = useScroll({
@@ -42,9 +42,21 @@ const Contact = () => {
     }
   }
 
-  const handleSubmit = (e) => {
+  const buildMailtoHref = () => {
+    const trimmedName = form.name.trim()
+    const trimmedEmail = form.email.trim()
+    const trimmedSubject = form.subject.trim()
+    const trimmedMessage = form.message.trim()
+    const subject = encodeURIComponent(trimmedSubject || 'Portfolio Inquiry')
+    const body = encodeURIComponent(
+      `From: ${trimmedName} (${trimmedEmail})\n\n${trimmedMessage}`
+    )
+    return `mailto:${PROFILE.email}?subject=${subject}&body=${body}`
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setStatus({ type: '', message: '' })
+    setStatus({ type: '', message: '', showMailto: false })
 
     const validation = validateContactForm(form)
     if (!validation.valid) {
@@ -55,40 +67,109 @@ const Contact = () => {
     setFieldErrors({})
     setLoading(true)
 
-    const serviceId = 'service_kdhyqep'
-    const templateId = 'template_ucws3do'
-    const publicKey = 'GhQi_RB8-SVTv9fmD'
+    const trimmedName = form.name.trim()
+    const trimmedEmail = form.email.trim()
+    const trimmedSubject = form.subject.trim()
+    const trimmedMessage = form.message.trim()
 
-    emailjs
-      .send(
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_kdhyqep'
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_ucws3do'
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'GhQi_RB8-SVTv9fmD'
+
+    try {
+      await emailjs.send(
         serviceId,
         templateId,
         {
-          from_name: form.name.trim(),
-          from_email: form.email.trim(),
-          subject: form.subject.trim(),
-          message: `${form.message.trim()} — ${form.name.trim()} (${form.email.trim()})`,
+          from_name: trimmedName,
+          from_email: trimmedEmail,
+          reply_to: trimmedEmail,
+          to_name: PROFILE.name,
+          to_email: PROFILE.email,
+          subject: trimmedSubject,
+          message: `${trimmedMessage}\n\n— ${trimmedName} (${trimmedEmail})`,
         },
         publicKey
       )
-      .then(
-        () => {
-          setLoading(false)
+
+      setStatus({
+        type: 'success',
+        message: 'Message sent. Thank you for reaching out — I will respond shortly.',
+        showMailto: false,
+      })
+      setForm({ name: '', email: '', subject: '', message: '' })
+    } catch (emailJsError) {
+      console.warn('EmailJS unavailable, attempting backup mail delivery:', emailJsError)
+      const controller = new AbortController()
+      const timeoutId = window.setTimeout(
+        () => controller.abort(new DOMException('Backup mail delivery timed out', 'TimeoutError')),
+        7000
+      )
+      try {
+        const res = await fetch(`https://formsubmit.co/ajax/${PROFILE.email}`, {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            name: trimmedName,
+            email: trimmedEmail,
+            _replyto: trimmedEmail,
+            _subject: `Portfolio Message: ${trimmedSubject}`,
+            subject: trimmedSubject,
+            message: trimmedMessage,
+            _template: 'table',
+            _captcha: 'false',
+          }),
+        })
+
+        const data = await res.json().catch(() => ({}))
+        const delivered = res.ok && (data?.success === true || data?.success === 'true')
+        const needsActivation =
+          typeof data?.message === 'string' && /activat/i.test(data.message)
+
+        if (delivered) {
           setStatus({
             type: 'success',
             message: 'Message sent. Thank you for reaching out — I will respond shortly.',
+            showMailto: false,
           })
           setForm({ name: '', email: '', subject: '', message: '' })
-        },
-        (error) => {
-          setLoading(false)
-          console.error(error)
+        } else if (needsActivation) {
           setStatus({
             type: 'error',
-            message: `Delivery failed. Please email me directly at ${PROFILE.email}.`,
+            message: `One-time verification needed: an activation email was sent to ${PROFILE.email}. Click "Activate Form" in your inbox (or reconnect Gmail in EmailJS) to enable instant delivery, or send directly via your email app below.`,
+            showMailto: true,
+          })
+        } else {
+          setStatus({
+            type: 'error',
+            message: `Automated delivery is temporarily unavailable. You can send this exact message directly to ${PROFILE.email} using your email app below.`,
+            showMailto: true,
           })
         }
-      )
+      } catch (fallbackError) {
+        const isTimeout =
+          fallbackError?.name === 'AbortError' || fallbackError?.name === 'TimeoutError'
+        console.warn(
+          isTimeout
+            ? 'Backup mail delivery timed out; showing direct email fallback.'
+            : 'Backup mail delivery unavailable; showing direct email fallback.',
+          fallbackError
+        )
+        setStatus({
+          type: 'error',
+          message: `Automated delivery is temporarily unavailable. You can send this exact message directly to ${PROFILE.email} using your email app below.`,
+          showMailto: true,
+        })
+      } finally {
+        window.clearTimeout(timeoutId)
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   const inputBase =
@@ -286,22 +367,33 @@ const Contact = () => {
               {status.message && (
                 <div
                   role="status"
-                  className={`p-4 rounded-lg text-sm font-medium border ${
+                  className={`p-4 rounded-lg text-sm font-medium border space-y-3 ${
                     status.type === 'success'
                       ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                       : 'bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800'
                   }`}
                 >
-                  <span className="font-semibold">
-                    {status.type === 'success' ? 'Sent: ' : 'Notice: '}
-                  </span>
-                  {status.message}
+                  <p>
+                    <span className="font-semibold">
+                      {status.type === 'success' ? 'Sent: ' : 'Notice: '}
+                    </span>
+                    {status.message}
+                  </p>
+                  {status.showMailto && (
+                    <a
+                      href={buildMailtoHref()}
+                      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md bg-zinc-900 text-zinc-50 hover:bg-copper-600 dark:bg-copper-500 dark:text-obsidian-950 dark:hover:bg-copper-400 text-xs font-semibold transition-colors duration-150"
+                    >
+                      <MdEmail size={14} aria-hidden="true" />
+                      <span>Open in Email App ({PROFILE.email})</span>
+                    </a>
+                  )}
                 </div>
               )}
 
               <div className="pt-2 flex items-center justify-between gap-4">
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  Delivered directly via EmailJS.
+                  Delivered directly to {PROFILE.email}.
                 </p>
                 <button
                   type="submit"
