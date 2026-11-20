@@ -4,6 +4,7 @@ import {
   TECH_STACK,
   SKILL_DOMAINS,
   CAPABILITIES,
+  CERTIFICATIONS,
   filterSkillsByDomain,
 } from '../utils/portfolioData'
 
@@ -61,15 +62,13 @@ const Skills = () => {
               About Arun
             </h3>
             <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">
-              Web Developer and UI/UX Designer with hands-on command of HTML, CSS, JavaScript,
-              React, and Data Structures &amp; Algorithms in C++. Focused on responsive,
-              high-performance web applications structured around OOP, modular architecture, and
-              Low-Level Design.
+              Computer Science &amp; Engineering undergraduate at KIET Group of Institutions (AKTU)
+              and Data Analyst Intern at Mnivesh &amp; InAmigos. Focused on React.js, Next.js,
+              UI/UX design, and Data Structures &amp; Algorithms in C++.
             </p>
             <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">
-              Experienced across RESTful APIs, MySQL, MongoDB, AWS (EC2, S3, IAM), and modern
-              AI engineering workflows—translating product concepts from Figma to clean,
-              maintainable code.
+              Experienced across Python, SQL, Power BI, Tableau, AWS (EC2, S3, IAM), MySQL,
+              MongoDB, and AI-assisted workflows using Claude, GitHub Copilot, and Stitch.
             </p>
           </div>
 
@@ -139,6 +138,41 @@ const Skills = () => {
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
                   {cap.description}
                 </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Certifications Grid */}
+        <div className="pt-4">
+          <div className="flex items-baseline justify-between gap-4 mb-8">
+            <h3 className="font-display text-xl font-bold text-zinc-900 dark:text-zinc-100">
+              Certifications
+            </h3>
+            <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tabular-nums">
+              {CERTIFICATIONS.length} Verified Credentials
+            </span>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {CERTIFICATIONS.map((cert) => (
+              <div
+                key={cert.title}
+                className="p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-obsidian-900/90 flex flex-col justify-between gap-3"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-mono text-xs text-copper-600 dark:text-copper-400 tabular-nums">
+                    {cert.index}
+                  </span>
+                  <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tabular-nums">
+                    {cert.year}
+                  </span>
+                </div>
+                <div>
+                  <h4 className="font-display text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug">
+                    {cert.title}
+                  </h4>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{cert.issuer}</p>
+                </div>
               </div>
             ))}
           </div>

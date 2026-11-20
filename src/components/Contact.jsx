@@ -117,9 +117,9 @@ const Contact = () => {
               </p>
             </div>
 
-            <div className="pt-6 border-t border-zinc-200/80 dark:border-zinc-800/80 space-y-4">
+            <div className="pt-6 border-t border-zinc-200/80 dark:border-zinc-800/80 space-y-3">
               <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-                Direct Email
+                Direct Contact
               </p>
               <a
                 href={`mailto:${PROFILE.email}`}
@@ -132,6 +132,13 @@ const Contact = () => {
                 <span className="text-xs text-zinc-400 group-hover:text-copper-500 transition-colors">
                   →
                 </span>
+              </a>
+              <a
+                href={`tel:${PROFILE.phone.replace(/\s+/g, '')}`}
+                className="flex items-center justify-between px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-obsidian-900/90 hover:border-copper-500 dark:hover:border-copper-400 transition-colors duration-150 text-xs font-mono text-zinc-700 dark:text-zinc-300"
+              >
+                <span>Phone</span>
+                <span>{PROFILE.phone}</span>
               </a>
             </div>
 

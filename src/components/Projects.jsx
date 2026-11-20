@@ -70,28 +70,59 @@ const ProjectCard = ({ project, index, onInspect }) => {
         className="h-full flex flex-col rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:border-copper-500/60 dark:hover:border-copper-400/60 bg-white/95 dark:bg-obsidian-900/90 overflow-hidden shadow-sm transition-colors duration-200 will-change-transform"
       >
         {/* Visual Preview Container */}
-        <div className="relative aspect-[16/10] overflow-hidden bg-alabaster-100 dark:bg-obsidian-850 border-b border-zinc-200 dark:border-zinc-800">
-          {!imgError ? (
-            <img
-              src={project.image}
-              alt={`${project.title} interface preview`}
-              referrerPolicy="no-referrer"
-              onError={() => setImgError(true)}
-              style={{
-                transform: hovered ? 'scale(1.04)' : 'scale(1)',
-              }}
-              className="w-full h-full object-cover transition-transform duration-500 ease-out"
-            />
+        <div
+          className={`relative ${
+            project.image && !imgError ? 'aspect-[16/10]' : 'min-h-[220px] sm:aspect-[16/10]'
+          } overflow-hidden bg-alabaster-100 dark:bg-obsidian-850 border-b border-zinc-200 dark:border-zinc-800`}
+        >
+          {project.image && !imgError ? (
+            <>
+              <img
+                src={project.image}
+                alt={`${project.title} interface preview`}
+                referrerPolicy="no-referrer"
+                onError={() => setImgError(true)}
+                style={{
+                  transform: hovered ? 'scale(1.04)' : 'scale(1)',
+                }}
+                className="w-full h-full object-cover transition-transform duration-500 ease-out"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+              <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-zinc-100">
+                <span className="font-mono tabular-nums">{project.index}</span>
+                <span>{project.year}</span>
+              </div>
+            </>
           ) : (
-            <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-br from-obsidian-850 to-obsidian-950 text-zinc-300">
-              <span className="font-display text-lg font-semibold">{project.title}</span>
+            <div className="w-full h-full p-5 sm:p-6 flex flex-col justify-between gap-4 bg-gradient-to-br from-alabaster-100 via-white to-alabaster-200 dark:from-obsidian-900 dark:via-obsidian-850 dark:to-obsidian-950">
+              <div className="flex items-center justify-between gap-3 text-xs font-mono">
+                <span className="text-copper-600 dark:text-copper-400">
+                  <span className="tabular-nums">{project.index}</span>{' '}
+                  <span aria-hidden="true">·</span> {project.category}
+                </span>
+                <span className="text-zinc-500 dark:text-zinc-400 tabular-nums">
+                  {project.year}
+                </span>
+              </div>
+              <div className="space-y-3">
+                <p className="font-display text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 leading-snug">
+                  {project.title}
+                </p>
+                {project.deliverables && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {project.deliverables.map((item) => (
+                      <div
+                        key={item}
+                        className="px-2.5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-obsidian-950/70 text-[11px] font-medium text-zinc-700 dark:text-zinc-300 leading-tight"
+                      >
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-          <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-zinc-100">
-            <span className="font-mono tabular-nums">{project.index}</span>
-            <span>{project.year}</span>
-          </div>
         </div>
 
         {/* Content Body */}
@@ -188,7 +219,7 @@ const Projects = () => {
           <div
             role="group"
             aria-label="Filter projects by category"
-            className="inline-flex items-center gap-1 p-1 rounded-lg bg-white/90 dark:bg-obsidian-900/90 border border-zinc-200 dark:border-zinc-800 self-start md:self-auto"
+            className="inline-flex flex-wrap items-center gap-1 p-1 rounded-lg bg-white/90 dark:bg-obsidian-900/90 border border-zinc-200 dark:border-zinc-800 self-start md:self-auto max-w-full"
           >
             {PROJECT_CATEGORIES.map((category) => (
               <button
@@ -268,14 +299,16 @@ const Projects = () => {
             </div>
 
             <div className="p-6 space-y-6">
-              <div className="aspect-[16/9] rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-obsidian-950">
-                <img
-                  src={selectedProject.image}
-                  alt={selectedProject.title}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              {selectedProject.image && (
+                <div className="aspect-[16/9] rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-obsidian-950">
+                  <img
+                    src={selectedProject.image}
+                    alt={selectedProject.title}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
 
               <div className="space-y-3">
                 <h3

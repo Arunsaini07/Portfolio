@@ -22,11 +22,14 @@ const Footer = ({ darkMode, onToggleTheme }) => {
           <a href="#home" className="hover:text-copper-500 transition-colors">
             Home
           </a>
+          <a href="#experience" className="hover:text-copper-500 transition-colors">
+            Experience
+          </a>
           <a href="#projects" className="hover:text-copper-500 transition-colors">
             Projects
           </a>
           <a href="#skills" className="hover:text-copper-500 transition-colors">
-            Capabilities
+            Skills
           </a>
           <a href="#contact" className="hover:text-copper-500 transition-colors">
             Contact

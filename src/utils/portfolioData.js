@@ -3,24 +3,36 @@ export const PROFILE = {
   firstName: 'Arun',
   roles: [
     'Frontend Developer',
+    'Data Analyst',
     'UI/UX Designer',
-    'React Specialist',
-    '3D Web Builder',
+    'React & Next.js Builder',
   ],
   headline: 'Crafting spatial web experiences & resilient interfaces.',
   summary:
-    'Frontend developer and UI/UX designer focused on React, interactive 3D architecture, and clean full-stack product execution.',
-  availability: 'Open for select frontend & full-stack roles',
-  location: 'India · Remote Ready',
+    'B.Tech CSE undergraduate (KIET Group of Institutions) and Data Analyst Intern at Mnivesh & InAmigos—combining React, interactive 3D interfaces, and Python, SQL & Power BI analytics.',
+  availability: 'Open for frontend, full-stack & data analyst roles',
+  location: 'Ghaziabad, India · Remote Ready',
   email: 'arunsaini8092@gmail.com',
-  resumeUrl:
-    'https://drive.google.com/file/d/1RMgtDMQbGzgLnwAi9NLZxcjyvUW3tJy9/view?usp=drive_link',
+  phone: '+91 9897179694',
+  resumeUrl: 'assets/aistudio/Resume_5d586941.pdf',
   portraitSrc: 'profile.jpeg',
   fallbackPortraitSrc: 'profile1.jpeg',
   metrics: [
-    { value: '6+', label: 'Months Experience', detail: 'Production web & UI engineering' },
-    { value: '3+', label: 'Projects Shipped', detail: 'Full-stack & interactive builds' },
-    { value: '20+', label: 'Core Technologies', detail: 'Frontend, cloud, SQL & design' },
+    {
+      value: '2',
+      label: 'Data Analyst Internships',
+      detail: 'Mnivesh & InAmigos (2026)',
+    },
+    {
+      value: '4',
+      label: 'Featured Projects',
+      detail: 'Full-stack web, UI & analytics',
+    },
+    {
+      value: '6',
+      label: 'Industry Certifications',
+      detail: 'AWS, Oracle, MongoDB & Python',
+    },
   ],
   socials: [
     {
@@ -50,113 +62,261 @@ export const PROFILE = {
   ],
 }
 
+export const EXPERIENCES = [
+  {
+    id: 'mnivesh',
+    index: '01',
+    company: 'Mnivesh',
+    role: 'Data Analyst Intern',
+    type: 'Internship',
+    period: 'Jul 23, 2026 – Oct 23, 2026',
+    duration: '3 Months',
+    stack: ['Python', 'Excel', 'Power BI', 'Tableau'],
+    highlights: [
+      'Organized and analyzed datasets to identify patterns, trends, and key performance insights.',
+      'Prepared analysis outputs and interactive dashboards to support business reporting and decision-making.',
+    ],
+  },
+  {
+    id: 'inamigos',
+    index: '02',
+    company: 'InAmigos',
+    role: 'Data Analyst Intern',
+    type: 'Internship',
+    period: 'Jan 1, 2026 – Jan 28, 2026',
+    duration: '1 Month',
+    stack: ['Python', 'Excel', 'Power BI'],
+    highlights: [
+      'Supported data collection, data cleaning, and analysis to turn raw operational data into actionable insights.',
+      'Created structured reports and visualizations to communicate trends and guide data-driven decision-making.',
+    ],
+  },
+]
+
+export const EDUCATION_AND_ACHIEVEMENT = {
+  education: {
+    degree: 'Bachelor of Technology in Computer Science Engineering',
+    institution: 'KIET Group of Institutions, Ghaziabad (AKTU)',
+    period: 'Aug 2023 – May 2027',
+  },
+  achievement: {
+    title: 'SIH (Smart India Hackathon – Institute Level)',
+    badge: 'Internal Finalist',
+    year: '2025',
+    detail:
+      'Secured 67th rank among 600 participating teams in the Smart India Hackathon internal hackathon conducted at the institute level.',
+  },
+}
+
+export const CERTIFICATIONS = [
+  {
+    index: '01',
+    title: 'AWS Certified Cloud Practitioner',
+    issuer: 'Amazon Web Services',
+    year: '2026',
+  },
+  {
+    index: '02',
+    title: 'Ultimate Job-Ready AI-Powered Data Analytics',
+    issuer: 'Data & AI Analytics Track',
+    year: '2026',
+  },
+  {
+    index: '03',
+    title: 'Oracle Database Foundations Certification',
+    issuer: 'Oracle',
+    year: '2025',
+  },
+  {
+    index: '04',
+    title: 'MongoDB Certification',
+    issuer: 'MongoDB',
+    year: '2025',
+  },
+  {
+    index: '05',
+    title: 'Python Certification',
+    issuer: 'Core Programming',
+    year: '2025',
+  },
+  {
+    index: '06',
+    title: 'Infosys Certification',
+    issuer: 'Infosys',
+    year: '2025',
+  },
+]
+
 export const PROJECTS = [
   {
-    id: 'faculty-hiring-portal',
+    id: 'faculty-recruitment-system',
     index: '01',
-    title: 'Faculty Hiring Portal',
+    title: 'Faculty Recruitment Management System',
     category: 'Full-Stack',
-    year: '2025',
+    year: '2026',
     summary:
-      'Full-stack recruitment platform digitizing university faculty hiring workflows with online applications, document verification, approval tracking, and compliance checks.',
+      'Full-stack faculty recruitment platform streamlining applications, credential verification, multi-stage approvals, and compliance workflows.',
     architecture:
-      'Built modular multi-stage candidate workflows, automated document validation queues, and role-based review pipelines to replace manual spreadsheet tracking.',
+      'Implemented role-based authentication, structured administrative dashboards, automated notifications, and end-to-end CRUD pipelines backed by relational SQL schemas.',
     highlights: [
-      'Multi-step candidate submission and credential audit trail',
-      'Department approval routing with compliance status tracking',
-      'Responsive administrative dashboard engineered with Tailwind CSS',
+      'Role-based authentication across applicants, reviewers, and department heads',
+      'Application, document verification, approval tracking, and compliance workflows',
+      'Relational database integration with MySQL / PostgreSQL and responsive React UI',
     ],
     image: 'faculty.png',
-    techStack: ['React', 'Tailwind CSS', 'JavaScript'],
+    techStack: ['React', 'MySQL', 'PostgreSQL'],
     liveLink: 'https://footprint-demo.com',
     githubLink: 'https://github.com/Arunsaini07',
   },
   {
     id: 'labour-hub',
     index: '02',
-    title: 'LabourHub',
-    category: 'Frontend & UI',
-    year: '2025',
+    title: 'Labour Hub',
+    category: 'Full-Stack',
+    year: '2026',
     summary:
-      'Two-sided workforce marketplace connecting skilled laborers with local employers through fast registration, job discovery, and streamlined hiring workflows.',
+      'Two-sided workforce platform connecting skilled workers and employers with fast onboarding, job discovery, and candidate management.',
     architecture:
-      'Designed clear high-contrast onboarding flows for workers and employers, pairing structured job cards with accessible mobile-first navigation.',
+      'Engineered with Next.js and React over MySQL for low-latency job search, employer posting workflows, application tracking, and secure session handling.',
     highlights: [
-      'Dual-role discovery flow for workers and hiring contractors',
-      'Fast, accessible listing cards designed for low-bandwidth screens',
-      'Component-driven UI built in React with clean CSS layout architecture',
+      'Registration, job search, applications, postings, and candidate management flows',
+      'Responsive mobile-first UI designed for fast interaction across devices',
+      'Secure authentication and normalized MySQL database integration',
     ],
     image: 'labour.png',
-    techStack: ['React', 'CSS3', 'HTML5'],
+    techStack: ['Next.js', 'React', 'MySQL'],
     liveLink: 'https://eduadi-demo.com',
+    githubLink: 'https://github.com/Arunsaini07',
+  },
+  {
+    id: 'gurgaon-real-estate-analysis',
+    index: '03',
+    title: 'Gurgaon Real Estate Market Analysis',
+    category: 'Data & Analytics',
+    year: '2026',
+    summary:
+      'End-to-end real estate analytics project uncovering pricing distributions, locality demand trends, and investment indicators across Gurgaon.',
+    architecture:
+      'Combined Python data preprocessing and SQL querying with Excel modeling and interactive Power BI dashboards to surface pricing anomalies and growth corridors.',
+    highlights: [
+      'Cleaned and normalized raw property listings using Python and SQL',
+      'Evaluated pricing per sq. ft., property mix, and regional demand trends',
+      'Built interactive Power BI executive reports to support investment decisions',
+    ],
+    image: null,
+    deliverables: ['Pricing & Demand Trends', 'Data Cleaning Pipeline', 'Interactive Power BI'],
+    techStack: ['Python', 'Excel', 'SQL', 'Power BI'],
+    liveLink: 'https://github.com/Arunsaini07',
+    githubLink: 'https://github.com/Arunsaini07',
+  },
+  {
+    id: 'ai-web-dev-workflow',
+    index: '04',
+    title: 'AI-Assisted Web Development Workflow',
+    category: 'Frontend & AI',
+    year: '2026',
+    summary:
+      'Modern AI-augmented frontend engineering workflow uniting React, Claude, GitHub Copilot, and Stitch for rapid UI design and production delivery.',
+    architecture:
+      'Integrated prompt-driven UI wireframing in Stitch with assisted component authoring, debugging, and technical documentation in React.',
+    highlights: [
+      'Combined Claude, GitHub Copilot, and Stitch for UI design and React implementation',
+      'Accelerated code generation, debugging, documentation, and rapid prototyping',
+      'Improved delivery velocity while maintaining responsive, clean interface standards',
+    ],
+    image: null,
+    deliverables: ['UI Prototyping (Stitch)', 'Assisted React Delivery', 'Automated Docs & Debug'],
+    techStack: ['React', 'Claude', 'GitHub Copilot', 'Stitch'],
+    liveLink: 'https://github.com/Arunsaini07',
     githubLink: 'https://github.com/Arunsaini07',
   },
 ]
 
-export const PROJECT_CATEGORIES = ['All', 'Full-Stack', 'Frontend & UI']
+export const PROJECT_CATEGORIES = ['All', 'Full-Stack', 'Data & Analytics', 'Frontend & AI']
 
 export const TECH_STACK = [
-  { name: 'HTML5', domain: 'Frontend', level: 'Core' },
-  { name: 'CSS3', domain: 'Frontend', level: 'Core' },
-  { name: 'JavaScript', domain: 'Frontend', level: 'Core' },
-  { name: 'React', domain: 'Frontend', level: 'Core' },
-  { name: 'Next.js', domain: 'Frontend', level: 'Proficient' },
-  { name: 'Tailwind CSS', domain: 'Frontend', level: 'Core' },
-  { name: 'Bootstrap', domain: 'Frontend', level: 'Proficient' },
-  { name: 'Three.js', domain: 'Frontend', level: 'Interactive 3D' },
-  { name: 'Node.js', domain: 'Backend & Data', level: 'Proficient' },
-  { name: 'Python', domain: 'Backend & Data', level: 'Proficient' },
-  { name: 'C', domain: 'Backend & Data', level: 'Foundational' },
-  { name: 'C++ (DSA)', domain: 'Backend & Data', level: 'Core' },
-  { name: 'MySQL', domain: 'Backend & Data', level: 'Proficient' },
-  { name: 'MongoDB', domain: 'Backend & Data', level: 'Proficient' },
-  { name: 'AWS (EC2, S3, IAM)', domain: 'Cloud & Design', level: 'Cloud' },
-  { name: 'Git', domain: 'Cloud & Design', level: 'Workflow' },
-  { name: 'GitHub', domain: 'Cloud & Design', level: 'Workflow' },
-  { name: 'Figma', domain: 'Cloud & Design', level: 'UI/UX' },
-  { name: 'Adobe', domain: 'Cloud & Design', level: 'Visual' },
-  { name: 'Canva', domain: 'Cloud & Design', level: 'Visual' },
-  { name: 'Excel', domain: 'Cloud & Design', level: 'Analysis' },
+  { name: 'React.js', domain: 'Frontend & UI', level: 'Core' },
+  { name: 'Next.js', domain: 'Frontend & UI', level: 'Proficient' },
+  { name: 'JavaScript', domain: 'Frontend & UI', level: 'Core' },
+  { name: 'Tailwind CSS', domain: 'Frontend & UI', level: 'Core' },
+  { name: 'Three.js', domain: 'Frontend & UI', level: 'Interactive 3D' },
+  { name: 'Figma', domain: 'Frontend & UI', level: 'UI/UX' },
+  { name: 'Stitch', domain: 'Frontend & UI', level: 'UI Design' },
+  { name: 'Canva', domain: 'Frontend & UI', level: 'Visual' },
+  { name: 'Responsive Web Design', domain: 'Frontend & UI', level: 'Core' },
+
+  { name: 'Python', domain: 'Data & AI', level: 'Core' },
+  { name: 'Power BI', domain: 'Data & AI', level: 'Analytics' },
+  { name: 'Tableau', domain: 'Data & AI', level: 'Analytics' },
+  { name: 'Excel', domain: 'Data & AI', level: 'Analytics' },
+  { name: 'Apache Spark', domain: 'Data & AI', level: 'Big Data' },
+  { name: 'Apache Flink', domain: 'Data & AI', level: 'Streaming' },
+  { name: 'Machine Learning', domain: 'Data & AI', level: 'Applied' },
+  { name: 'Deep Learning', domain: 'Data & AI', level: 'Foundational' },
+  { name: 'Neural Networks', domain: 'Data & AI', level: 'Foundational' },
+
+  { name: 'Node.js', domain: 'Backend & Cloud', level: 'Proficient' },
+  { name: 'SQL', domain: 'Backend & Cloud', level: 'Core' },
+  { name: 'MySQL', domain: 'Backend & Cloud', level: 'Core' },
+  { name: 'PostgreSQL', domain: 'Backend & Cloud', level: 'Proficient' },
+  { name: 'MongoDB', domain: 'Backend & Cloud', level: 'Proficient' },
+  { name: 'AWS (EC2, S3, IAM)', domain: 'Backend & Cloud', level: 'Certified' },
+  { name: 'RESTful APIs', domain: 'Backend & Cloud', level: 'Core' },
+
+  { name: 'C++ (DSA)', domain: 'Tools & Core', level: 'Core' },
+  { name: 'C', domain: 'Tools & Core', level: 'Foundational' },
+  { name: 'System Design', domain: 'Tools & Core', level: 'Core' },
+  { name: 'Low-Level Design', domain: 'Tools & Core', level: 'Core' },
+  { name: 'Claude', domain: 'Tools & Core', level: 'AI Workflow' },
+  { name: 'GitHub Copilot', domain: 'Tools & Core', level: 'AI Workflow' },
+  { name: 'Replit AI', domain: 'Tools & Core', level: 'AI Workflow' },
+  { name: 'Git & GitHub', domain: 'Tools & Core', level: 'Version Control' },
 ]
 
-export const SKILL_DOMAINS = ['All', 'Frontend', 'Backend & Data', 'Cloud & Design']
+export const SKILL_DOMAINS = [
+  'All',
+  'Frontend & UI',
+  'Data & AI',
+  'Backend & Cloud',
+  'Tools & Core',
+]
 
 export const CAPABILITIES = [
   {
     index: '01',
-    title: 'Responsive Interface Systems',
+    title: 'Data Analytics & BI Reporting',
     description:
-      'Pixel-accurate, mobile-first layouts engineered with clean visual hierarchy and consistent spatial rhythm across viewports.',
+      'Transforming raw datasets into clean, decision-ready dashboards and insights using Python, SQL, Excel, Power BI, and Tableau.',
   },
   {
     index: '02',
-    title: 'Modular React Architecture',
+    title: 'Modular React & Next.js Apps',
     description:
-      'Reusable component boundaries, decoupled state logic, and maintainable patterns grounded in OOP and LLD principles.',
+      'Building full-stack web interfaces with role-based access, clean component boundaries, and maintainable OOP & LLD patterns.',
   },
   {
     index: '03',
-    title: 'Runtime Performance',
+    title: 'Cloud & Relational Databases',
     description:
-      'Optimized rendering pipelines, GPU-composited motion, and lightweight asset delivery for crisp interactive responsiveness.',
+      'AWS Certified Cloud Practitioner foundation (EC2, S3, IAM) paired with Oracle, MySQL, PostgreSQL, and MongoDB integration.',
   },
   {
     index: '04',
-    title: 'DSA & Analytical Rigor',
+    title: 'DSA & System Design Rigor',
     description:
-      'Structured problem-solving in C++ and JavaScript paired with optimized SQL querying and RESTful API integration.',
+      'Structured problem-solving in C++ and Python backed by System Design, RESTful APIs, and distributed processing with Spark & Flink.',
   },
   {
     index: '05',
-    title: 'Cross-Functional Delivery',
+    title: 'UI/UX & Spatial 3D Craft',
     description:
-      'Clear engineering communication, Git collaboration, and rapid prototyping from Figma wireframes to production code.',
+      'Translating product flows from Figma and Stitch into responsive, interactive Three.js and Tailwind CSS web experiences.',
   },
   {
     index: '06',
-    title: 'AI-Assisted Workflows',
+    title: 'AI-Assisted Engineering',
     description:
-      'Practical command of modern AI engineering tools to accelerate debugging, automation, and product iteration.',
+      'Leveraging Claude, GitHub Copilot, and Replit AI to accelerate prototyping, debugging, documentation, and analytics workflows.',
   },
 ]
 
