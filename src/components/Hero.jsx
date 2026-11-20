@@ -1,365 +1,296 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motion'
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
 import { FaGithub, FaLinkedin, FaInstagram } from 'react-icons/fa'
-import { MdEmail } from 'react-icons/md'
+import { SiLeetcode } from 'react-icons/si'
+import { PROFILE, computeNormalizedTilt } from '../utils/portfolioData'
 
-// Typewriter hook
-const useTypewriter = (words, speed = 80, pause = 1800) => {
-  const [index, setIndex] = useState(0)
-  const [subIndex, setSubIndex] = useState(0)
-  const [deleting, setDeleting] = useState(false)
-  const [text, setText] = useState('')
-
-  useEffect(() => {
-    if (subIndex === words[index].length + 1 && !deleting) {
-      const timeout = setTimeout(() => setDeleting(true), pause)
-      return () => clearTimeout(timeout)
-    }
-    if (subIndex === 0 && deleting) {
-      setDeleting(false)
-      setIndex((prev) => (prev + 1) % words.length)
-      return
-    }
-    const timeout = setTimeout(() => {
-      setText(words[index].substring(0, subIndex))
-      setSubIndex((prev) => prev + (deleting ? -1 : 1))
-    }, deleting ? speed / 2 : speed)
-    return () => clearTimeout(timeout)
-  }, [subIndex, index, deleting, words, speed, pause])
-
-  return text
+const SOCIAL_ICONS = {
+  linkedin: FaLinkedin,
+  github: FaGithub,
+  leetcode: SiLeetcode,
+  instagram: FaInstagram,
 }
 
-// Floating particles component
-const Particles = () => {
-  const particles = Array.from({ length: 30 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 4 + 2,
-    duration: Math.random() * 6 + 4,
-    delay: Math.random() * 4,
-    color: i % 3 === 0 ? '#f43f5e' : i % 3 === 1 ? '#6366f1' : '#8b5cf6',
-  }))
+const useRoleCycle = (roles, intervalMs = 2600) => {
+  const [index, setIndex] = useState(0)
 
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((p) => (
-        <motion.div
-          key={p.id}
-          className="absolute rounded-full opacity-30"
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            width: p.size,
-            height: p.size,
-            backgroundColor: p.color,
-          }}
-          animate={{
-            y: [0, -40, 0],
-            x: [0, Math.random() * 30 - 15, 0],
-            opacity: [0.2, 0.6, 0.2],
-            scale: [1, 1.5, 1],
-          }}
-          transition={{
-            duration: p.duration,
-            repeat: Infinity,
-            delay: p.delay,
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
-    </div>
-  )
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setIndex((prev) => (prev + 1) % roles.length)
+    }, intervalMs)
+    return () => window.clearInterval(id)
+  }, [roles.length, intervalMs])
+
+  return roles[index]
 }
 
 const Hero = () => {
-  const roles = ['Frontend Developer', 'UI/UX Designer', 'React Specialist', 'Problem Solver']
-  const typedRole = useTypewriter(roles)
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
-  const springX = useSpring(mouseX, { stiffness: 50, damping: 20 })
-  const springY = useSpring(mouseY, { stiffness: 50, damping: 20 })
+  const activeRole = useRoleCycle(PROFILE.roles)
+  const sectionRef = useRef(null)
 
-  const socialLinks = [
-    { icon: FaLinkedin, href: 'https://www.linkedin.com/in/arun8092/', label: 'LinkedIn', color: 'hover:text-blue-600' },
-    { icon: FaGithub, href: 'https://github.com/Arunsaini07', label: 'GitHub', color: 'hover:text-gray-900 dark:hover:text-white' },
-    { icon: MdEmail, href: 'https://leetcode.com/u/Arun8092/', label: 'Email', color: 'hover:text-rose-500' },
-    { icon: FaInstagram, href: 'https://www.instagram.com/arunsaini__07/', label: 'Instagram', color: 'hover:text-pink-500' },
-  ]
+  const [portraitSrc, setPortraitSrc] = useState(PROFILE.portraitSrc)
+  const [portraitFailed, setPortraitFailed] = useState(false)
+  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 })
+  const [hovered, setHovered] = useState(false)
 
-  const handleMouseMove = (e) => {
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end start'],
+  })
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 140,
+    damping: 26,
+    mass: 0.25,
+  })
+
+  // Scroll-driven 3D parallax & perspective transition as user scrolls past Hero
+  const contentY = useTransform(smoothProgress, [0, 1], [0, -48])
+  const portraitScale = useTransform(smoothProgress, [0, 1], [1, 0.92])
+  const portraitScrollRotateX = useTransform(smoothProgress, [0, 1], [0, 10])
+  const portraitScrollY = useTransform(smoothProgress, [0, 1], [0, 36])
+
+  const handlePortraitMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect()
-    mouseX.set(((e.clientX - rect.left) / rect.width - 0.5) * 20)
-    mouseY.set(((e.clientY - rect.top) / rect.height - 0.5) * 20)
+    setTilt(
+      computeNormalizedTilt(
+        e.clientX - rect.left,
+        e.clientY - rect.top,
+        rect.width,
+        rect.height,
+        7
+      )
+    )
   }
 
-  // Stagger animation variants
-  const container = {
-    hidden: {},
-    show: { transition: { staggerChildren: 0.12, delayChildren: 0.3 } },
-  }
-  const item = {
-    hidden: { opacity: 0, y: 40, filter: 'blur(8px)' },
-    show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
+  const resetPortraitTilt = () => {
+    setHovered(false)
+    setTilt({ rotateX: 0, rotateY: 0 })
   }
 
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center overflow-hidden bg-gray-50 dark:bg-gray-950"
-      onMouseMove={handleMouseMove}
+      ref={sectionRef}
+      className="pt-28 pb-16 lg:pt-32 lg:pb-20 relative"
     >
-      {/* Animated background gradient orbs */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <motion.div
-          animate={{ x: [0, 60, 0], y: [0, -40, 0], scale: [1, 1.2, 1] }}
-          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -top-32 -left-32 w-96 h-96 bg-rose-400/20 dark:bg-rose-500/10 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ x: [0, -40, 0], y: [0, 60, 0], scale: [1.2, 1, 1.2] }}
-          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-          className="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-indigo-400/20 dark:bg-indigo-500/10 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ x: [0, 30, 0], y: [0, 30, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-violet-400/10 dark:bg-violet-500/5 rounded-full blur-3xl"
-        />
-      </div>
-
-      <Particles />
-
-      <div className="relative max-w-7xl mx-auto px-6 w-full pt-24 pb-16">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-
-          {/* Left Content */}
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Two-column balanced hero split */}
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-stretch">
+          {/* Left Typographic Column */}
           <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="space-y-8"
+            style={{ y: contentY }}
+            className="lg:col-span-7 flex flex-col justify-between py-4 px-2 sm:px-4 -mx-2 sm:-mx-4 rounded-2xl bg-gradient-to-br from-alabaster-50/85 via-alabaster-50/55 to-transparent dark:from-obsidian-950/85 dark:via-obsidian-950/55 dark:to-transparent space-y-8 will-change-transform"
           >
-            {/* Badge */}
-            <motion.div variants={item}>
-              <motion.span
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-rose-500/10 to-indigo-500/10 border border-rose-500/20 dark:border-indigo-500/30 text-sm font-semibold text-rose-600 dark:text-indigo-400"
-              >
-                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                Available for work
-              </motion.span>
-            </motion.div>
-
-            {/* Heading */}
-            <motion.div variants={item} className="space-y-2">
-              <p className="text-lg font-medium text-gray-500 dark:text-gray-400 tracking-wide">
-                Hi there! I'm
+            <div className="space-y-6">
+              <p className="text-xs font-medium tracking-wide text-zinc-600 dark:text-zinc-400">
+                {PROFILE.availability} <span aria-hidden="true">·</span> {PROFILE.location}
               </p>
-              <h1 className="text-6xl sm:text-7xl font-black leading-none tracking-tight">
-                <span className="text-gray-900 dark:text-white">Arun </span>
-                <br />
+
+              <h1
+                className="font-display font-bold tracking-tight text-zinc-900 dark:text-zinc-100 leading-[1.05] text-balance"
+                style={{ fontSize: 'clamp(2.5rem, 4.3vw, 4.15rem)' }}
+              >
+                Crafting spatial web{' '}
+                <span className="font-serif italic font-semibold text-copper-600 dark:text-copper-400">
+                  experiences
+                </span>{' '}
+                &amp; resilient interfaces.
               </h1>
-            </motion.div>
 
-            {/* Animated role */}
-            <motion.div variants={item} className="flex items-center gap-3">
-              <div className="w-8 h-0.5 bg-gradient-to-r from-rose-500 to-indigo-500 rounded-full" />
-              <p className="text-xl font-bold text-gray-700 dark:text-gray-200 min-w-[220px]">
-                I am a{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-indigo-600">
-                  {typedRole}
-                </span>
-                <motion.span
-                  animate={{ opacity: [1, 0, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity }}
-                  className="text-rose-500 ml-0.5"
-                >
-                  |
-                </motion.span>
-              </p>
-            </motion.div>
-
-            {/* Description */}
-            <motion.p
-              variants={item}
-              className="text-gray-500 dark:text-gray-400 text-base leading-relaxed max-w-md"
-            >
-              Passionate about crafting beautiful, responsive, and user-friendly web applications. 
-              I turn ideas into reality through clean code and modern design principles.
-            </motion.p>
-
-            {/* Social Links */}
-            <motion.div variants={item} className="flex items-center gap-3">
-              {socialLinks.map(({ icon: Icon, href, label, color }, i) => (
-                <motion.a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  whileHover={{ scale: 1.2, y: -4 }}
-                  whileTap={{ scale: 0.9 }}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-
-                  transition={{ delay: 0.8 + i * 0.1, type: 'spring', stiffness: 400 }}
-                  className={`w-11 h-11 rounded-2xl bg-white dark:bg-gray-800 shadow-md border border-gray-100 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 ${color} transition-all duration-300 hover:shadow-lg hover:border-transparent`}
-                >
-                  <Icon size={20} />
-                </motion.a>
-              ))}
-            </motion.div>
-
-            {/* CTA Buttons */}
-            <motion.div variants={item} className="flex flex-wrap gap-4">
-              <motion.a
-                href="https://drive.google.com/file/d/1RMgtDMQbGzgLnwAi9NLZxcjyvUW3tJy9/view?usp=drive_link"
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.97 }}
-                className="relative inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl text-white font-bold text-sm overflow-hidden group shadow-lg shadow-rose-500/25"
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-rose-500 to-indigo-600" />
-                <motion.span
-                  animate={{ x: ['-100%', '200%'] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: 'linear', repeatDelay: 1 }}
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12"
-                />
-                <span className="relative z-10 flex items-center gap-2">
-                  <span>↓</span>
-                  Download Resume
-                </span>
-              </motion.a>
-
-              <motion.a
-                href="#projects"
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.97 }}
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl text-gray-700 dark:text-gray-200 font-bold text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 shadow-md hover:shadow-lg hover:border-rose-200 dark:hover:border-indigo-500/30 transition-all duration-300"
-              >
-                View Projects
-                <motion.span
-                  animate={{ x: [0, 4, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  →
-                </motion.span>
-              </motion.a>
-            </motion.div>
-          </motion.div>
-
-          {/* Right Side – Floating Image */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, x: 60 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            transition={{ duration: 0.9, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative flex items-center justify-center"
-          >
-            {/* Outer glow ring */}
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-              className="absolute w-[340px] h-[340px] rounded-full border-2 border-dashed border-rose-300/40 dark:border-rose-500/20"
-            />
-            <motion.div
-              animate={{ rotate: -360 }}
-              transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
-              className="absolute w-[290px] h-[290px] rounded-full border-2 border-dashed border-indigo-300/40 dark:border-indigo-500/20"
-            />
-
-            {/* Floating dots around image */}
-            {[0, 60, 120, 180, 240, 300].map((deg, i) => (
-              <motion.div
-                key={i}
-                animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
-                style={{
-                  position: 'absolute',
-                  left: `calc(50% + ${Math.cos((deg * Math.PI) / 180) * 155}px)`,
-                  top: `calc(50% + ${Math.sin((deg * Math.PI) / 180) * 155}px)`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-                className={`w-3 h-3 rounded-full ${i % 2 === 0 ? 'bg-rose-400' : 'bg-indigo-400'}`}
-              />
-            ))}
-
-            {/* Image container */}
-            <motion.div
-              style={{ rotateX: springY, rotateY: springX }}
-              animate={{ y: [0, -12, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              className="relative w-64 h-72 rounded-3xl overflow-hidden shadow-2xl"
-            >
-              {/* Gradient border effect */}
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-rose-400 via-pink-500 to-indigo-600 p-0.5">
-                <div className="w-full h-full rounded-3xl bg-gray-200 dark:bg-gray-800 overflow-hidden">
-                  <img
-                    src="profile.jpeg"
-                    alt="Arun Saini"
-                    className="w-full h-full object-cover object-top"
-                    onError={(e) => {
-                      e.target.style.display = 'none'
-                      e.target.parentElement.style.background =
-                        'linear-gradient(135deg, #f43f5e20, #6366f120)'
-                    }}
-                  />
-                </div>
+              <div className="flex items-center gap-3 pt-1">
+                <span className="w-8 h-px bg-copper-500 shrink-0" aria-hidden="true" />
+                <p className="text-sm sm:text-base font-medium text-zinc-700 dark:text-zinc-300">
+                  {PROFILE.name}{' '}
+                  <span className="text-zinc-400 dark:text-zinc-600 mx-1.5" aria-hidden="true">
+                    /
+                  </span>
+                  <span className="text-copper-600 dark:text-copper-400 font-semibold">
+                    {activeRole}
+                  </span>
+                </p>
               </div>
 
-              {/* Shimmer overlay */}
-              <motion.div
-                animate={{ x: ['-100%', '200%'] }}
-                transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, ease: 'linear' }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 pointer-events-none"
-              />
-            </motion.div>
+              <p className="text-base text-zinc-600 dark:text-zinc-300 leading-relaxed max-w-xl">
+                {PROFILE.summary}
+              </p>
+            </div>
 
-            {/* Floating badge - Experience */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0, x: 40 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              transition={{ delay: 1.2, type: 'spring', stiffness: 300 }}
-              whileHover={{ scale: 1.05 }}
-              className="absolute -right-4 top-8 bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-xl border border-gray-100 dark:border-white/10"
-            >
-              <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-indigo-600">6+</p>
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-tight">Months<br/>Experience</p>
-            </motion.div>
+            <div className="space-y-6">
+              {/* Actions + Theme Switch */}
+              <div className="flex flex-wrap items-center gap-4">
+                <a
+                  href="#projects"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-zinc-900 text-zinc-50 hover:bg-copper-600 dark:bg-copper-500 dark:text-obsidian-950 dark:hover:bg-copper-400 text-sm font-semibold transition-colors duration-150 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-500"
+                >
+                  Explore Projects
+                  <span aria-hidden="true">→</span>
+                </a>
 
-            {/* Floating badge - Projects */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0, x: -40 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              transition={{ delay: 1.4, type: 'spring', stiffness: 300 }}
-              whileHover={{ scale: 1.05 }}
-              className="absolute -left-4 bottom-12 bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-xl border border-gray-100 dark:border-white/10"
-            >
-              <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-indigo-600">3+</p>
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-tight">Projects<br/>Completed</p>
-            </motion.div>
+                <a
+                  href={PROFILE.resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/90 dark:bg-obsidian-900/90 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:border-copper-500 hover:text-copper-600 dark:hover:border-copper-400 dark:hover:text-copper-400 text-sm font-semibold transition-colors duration-150 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-500"
+                >
+                  Download Resume
+                </a>
+              </div>
+
+              {/* Quiet Social Links Row */}
+              <div className="flex flex-wrap items-center gap-5 pt-2">
+                {PROFILE.socials.map((social) => {
+                  const Icon = SOCIAL_ICONS[social.id]
+                  return (
+                    <a
+                      key={social.id}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={social.label}
+                      className="inline-flex items-center gap-2 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-copper-600 dark:hover:text-copper-400 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-500 rounded-sm"
+                    >
+                      {Icon && <Icon size={15} aria-hidden="true" />}
+                      <span>{social.label}</span>
+                    </a>
+                  )
+                })}
+              </div>
+            </div>
           </motion.div>
+
+          {/* Right Portrait Visual Column with Architectural 3D Showcase Frame */}
+          <div
+            className="lg:col-span-5 flex items-center justify-center lg:justify-end"
+            style={{ perspective: '1200px' }}
+          >
+            <motion.div
+              style={{
+                scale: portraitScale,
+                y: portraitScrollY,
+                rotateX: portraitScrollRotateX,
+              }}
+              onMouseEnter={() => setHovered(true)}
+              onMouseMove={handlePortraitMove}
+              onMouseLeave={resetPortraitTilt}
+              className="w-full max-w-[420px] mx-auto lg:ml-auto lg:mr-0 will-change-transform"
+            >
+              <div
+                style={{
+                  transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
+                  transformStyle: 'preserve-3d',
+                  transition: hovered
+                    ? 'transform 120ms ease-out'
+                    : 'transform 350ms cubic-bezier(0.16, 1, 0.3, 1)',
+                }}
+                className="relative p-3 sm:p-3.5 rounded-2xl border border-zinc-300/90 dark:border-zinc-700/80 bg-white/95 dark:bg-obsidian-900/95 shadow-2xl"
+              >
+                {/* Offset Architectural Hairline Backplate */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -inset-2.5 rounded-[22px] border border-copper-500/25 dark:border-copper-400/20 -z-10"
+                />
+
+                {/* Corner Registration Ticks */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute top-1.5 left-1.5 w-3 h-3 border-t-2 border-l-2 border-copper-500/80 dark:border-copper-400/75 rounded-tl-sm"
+                />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute top-1.5 right-1.5 w-3 h-3 border-t-2 border-r-2 border-copper-500/80 dark:border-copper-400/75 rounded-tr-sm"
+                />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute bottom-1.5 left-1.5 w-3 h-3 border-b-2 border-l-2 border-copper-500/80 dark:border-copper-400/75 rounded-bl-sm"
+                />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute bottom-1.5 right-1.5 w-3 h-3 border-b-2 border-r-2 border-copper-500/80 dark:border-copper-400/75 rounded-br-sm"
+                />
+
+                {/* Inner 4:5 Photographic Aperture */}
+                <div
+                  style={{ transform: 'translateZ(18px)' }}
+                  className="relative aspect-[4/5] w-full rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-obsidian-950"
+                >
+                  {!portraitFailed ? (
+                    <img
+                      src={portraitSrc}
+                      alt="Arun Saini portrait"
+                      referrerPolicy="no-referrer"
+                      onError={() => {
+                        if (portraitSrc === PROFILE.portraitSrc) {
+                          setPortraitSrc(PROFILE.fallbackPortraitSrc)
+                        } else {
+                          setPortraitFailed(true)
+                        }
+                      }}
+                      style={{
+                        transform: hovered ? 'scale(1.03)' : 'scale(1)',
+                      }}
+                      className="w-full h-full object-cover object-[24%_14%] contrast-[1.04] transition-transform duration-500 ease-out"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-obsidian-850 to-obsidian-950">
+                      <span className="font-display text-5xl font-bold text-copper-400">AS</span>
+                    </div>
+                  )}
+
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10 ring-1 ring-inset ring-black/15 dark:ring-white/10" />
+                </div>
+
+                {/* Structured Editorial Caption Plate */}
+                <div className="mt-3.5 pt-3 px-1 border-t border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-display text-base font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+                      {PROFILE.name}
+                    </p>
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
+                      Frontend Developer &amp; UI/UX Designer
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="w-4 h-px bg-copper-500" aria-hidden="true" />
+                    <span className="text-xs font-mono text-copper-600 dark:text-copper-400">
+                      India
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
 
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-        >
-          <span className="text-xs font-medium text-gray-400 dark:text-gray-600 tracking-widest uppercase">Scroll</span>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="w-5 h-8 rounded-full border-2 border-gray-300 dark:border-gray-700 flex items-start justify-center pt-1.5"
-          >
-            <div className="w-1 h-2 rounded-full bg-gradient-to-b from-rose-500 to-indigo-500" />
-          </motion.div>
-        </motion.div>
+        {/* Full-Width Quantitative Strip Below Hero Split */}
+        <div className="mt-12 pt-8 border-t border-zinc-200/80 dark:border-zinc-800/80 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-copper-600 dark:text-copper-400">
+              Scroll Experience
+            </p>
+            <p className="font-display text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              Scroll to traverse the 3D space
+            </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Camera &amp; architecture respond to scroll depth
+            </p>
+          </div>
+
+          {PROFILE.metrics.map((metric) => (
+            <div
+              key={metric.label}
+              className="sm:border-l sm:border-zinc-200/80 dark:sm:border-zinc-800/80 sm:pl-6"
+            >
+              <p className="font-display text-2xl font-bold text-zinc-900 dark:text-zinc-100 tabular-nums">
+                {metric.value}
+              </p>
+              <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mt-0.5">
+                {metric.label}
+              </p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{metric.detail}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   )

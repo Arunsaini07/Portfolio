@@ -5,52 +5,47 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
-  
+
   body {
-    @apply transition-colors duration-300;
+    @apply bg-alabaster-50 text-zinc-900 dark:bg-obsidian-950 dark:text-zinc-100 transition-colors duration-300;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Bricolage Grotesque', system-ui, sans-serif;
   }
 }
 
-@layer components {
-  .glass-effect {
-    @apply bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg;
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
-  
-  .gradient-text {
-    @apply bg-gradient-to-r from-primary-red to-primary-indigo bg-clip-text text-transparent;
-  }
-  
-  .card-shadow {
-    @apply shadow-lg hover:shadow-2xl transition-shadow duration-300;
-  }
-  
-  .btn-primary {
-    @apply px-6 py-3 bg-primary-red text-white rounded-full font-medium 
-           hover:scale-105 hover:shadow-lg transform transition-all duration-300
-           active:scale-95;
-  }
-  
-  .btn-secondary {
-    @apply px-6 py-3 bg-primary-indigo text-white rounded-full font-medium 
-           hover:scale-105 hover:shadow-lg transform transition-all duration-300
-           active:scale-95;
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-/* Custom scrollbar */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Minimal scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-200 dark:bg-gray-800;
+  @apply bg-alabaster-100 dark:bg-obsidian-950;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-primary-red rounded-full;
+  @apply bg-zinc-400 dark:bg-zinc-700 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-red-600;
+  @apply bg-copper-500;
 }

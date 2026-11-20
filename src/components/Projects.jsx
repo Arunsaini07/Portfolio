@@ -1,275 +1,342 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FaReact, FaHtml5, FaCss3Alt, FaJs, FaGithub, FaExternalLinkAlt } from 'react-icons/fa'
-import { SiTailwindcss } from 'react-icons/si'
-import { fadeIn, staggerContainer } from '../animations/variants'
+import { useState, useEffect, useRef } from 'react'
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
+import { FaExternalLinkAlt, FaGithub } from 'react-icons/fa'
+import {
+  PROJECTS,
+  PROJECT_CATEGORIES,
+  filterProjects,
+  computeNormalizedTilt,
+} from '../utils/portfolioData'
 
-// Floating particles — same as Hero
-const Particles = () => {
-  const particles = Array.from({ length: 30 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 4 + 2,
-    duration: Math.random() * 6 + 4,
-    delay: Math.random() * 4,
-    color: i % 3 === 0 ? '#f43f5e' : i % 3 === 1 ? '#6366f1' : '#8b5cf6',
-  }))
+const ProjectCard = ({ project, index, onInspect }) => {
+  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 })
+  const [hovered, setHovered] = useState(false)
+  const [imgError, setImgError] = useState(false)
+  const cardRef = useRef(null)
+
+  const { scrollYProgress } = useScroll({
+    target: cardRef,
+    offset: ['start end', 'center center'],
+  })
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 140,
+    damping: 26,
+    mass: 0.25,
+  })
+
+  const scrollRotateX = useTransform(smoothProgress, [0, 1], [12, 0])
+  const scrollScale = useTransform(smoothProgress, [0, 1], [0.95, 1])
+  const scrollY = useTransform(smoothProgress, [0, 1], [index % 2 === 0 ? 36 : 56, 0])
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const next = computeNormalizedTilt(
+      e.clientX - rect.left,
+      e.clientY - rect.top,
+      rect.width,
+      rect.height,
+      6
+    )
+    setTilt(next)
+  }
+
+  const resetTilt = () => {
+    setHovered(false)
+    setTilt({ rotateX: 0, rotateY: 0 })
+  }
+
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((p) => (
-        <motion.div
-          key={p.id}
-          className="absolute rounded-full opacity-30"
-          style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size, backgroundColor: p.color }}
-          animate={{ y: [0, -40, 0], x: [0, Math.random() * 30 - 15, 0], opacity: [0.2, 0.6, 0.2], scale: [1, 1.5, 1] }}
-          transition={{ duration: p.duration, repeat: Infinity, delay: p.delay, ease: 'easeInOut' }}
-        />
-      ))}
-    </div>
+    <motion.article
+      ref={cardRef}
+      style={{
+        perspective: '1200px',
+        y: scrollY,
+        scale: scrollScale,
+        rotateX: scrollRotateX,
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={resetTilt}
+      className="group relative will-change-transform"
+    >
+      <div
+        style={{
+          transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
+          transition: hovered
+            ? 'transform 120ms ease-out'
+            : 'transform 350ms cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+        className="h-full flex flex-col rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:border-copper-500/60 dark:hover:border-copper-400/60 bg-white/95 dark:bg-obsidian-900/90 overflow-hidden shadow-sm transition-colors duration-200 will-change-transform"
+      >
+        {/* Visual Preview Container */}
+        <div className="relative aspect-[16/10] overflow-hidden bg-alabaster-100 dark:bg-obsidian-850 border-b border-zinc-200 dark:border-zinc-800">
+          {!imgError ? (
+            <img
+              src={project.image}
+              alt={`${project.title} interface preview`}
+              referrerPolicy="no-referrer"
+              onError={() => setImgError(true)}
+              style={{
+                transform: hovered ? 'scale(1.04)' : 'scale(1)',
+              }}
+              className="w-full h-full object-cover transition-transform duration-500 ease-out"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-br from-obsidian-850 to-obsidian-950 text-zinc-300">
+              <span className="font-display text-lg font-semibold">{project.title}</span>
+            </div>
+          )}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+          <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-zinc-100">
+            <span className="font-mono tabular-nums">{project.index}</span>
+            <span>{project.year}</span>
+          </div>
+        </div>
+
+        {/* Content Body */}
+        <div className="p-6 flex-1 flex flex-col justify-between space-y-6">
+          <div className="space-y-3">
+            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+              {project.category} <span aria-hidden="true">·</span> {project.techStack.join(' · ')}
+            </p>
+
+            <h3 className="font-display text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+              {project.title}
+            </h3>
+
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              {project.summary}
+            </p>
+          </div>
+
+          <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => onInspect(project)}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100 hover:text-copper-600 dark:hover:text-copper-400 transition-colors duration-150 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-500 rounded-sm"
+            >
+              Inspect Case Study
+              <span aria-hidden="true">→</span>
+            </button>
+
+            <div className="flex items-center gap-4">
+              <a
+                href={project.liveLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-copper-600 dark:hover:text-copper-400 transition-colors duration-150 whitespace-nowrap shrink-0"
+              >
+                <FaExternalLinkAlt size={11} aria-hidden="true" />
+                <span>Live App</span>
+              </a>
+
+              <a
+                href={project.githubLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-copper-600 dark:hover:text-copper-400 transition-colors duration-150 whitespace-nowrap shrink-0"
+              >
+                <FaGithub size={13} aria-hidden="true" />
+                <span>GitHub</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.article>
   )
 }
 
 const Projects = () => {
-  const [hoveredIndex, setHoveredIndex] = useState(null)
+  const [activeCategory, setActiveCategory] = useState('All')
+  const [selectedProject, setSelectedProject] = useState(null)
 
-  const projects = [
-    {
-      title: 'Faculty Hiring Portal',
-      description:
-        'Developed a full-stack web application to digitize and automate faculty hiring workflows, including online applications, document verification, approval tracking, and compliance checks.',
-      image: 'faculty.png',
-      techStack: [
-        { icon: FaReact, name: 'React', color: 'text-blue-500' },
-        { icon: SiTailwindcss, name: 'Tailwind', color: 'text-cyan-500' },
-        { icon: FaJs, name: 'JavaScript', color: 'text-yellow-500' },
-      ],
-      liveLink: 'https://footprint-demo.com',
-      githubLink: 'https://github.com/yourusername/footprint',
-      gradient: 'from-rose-500 to-indigo-600',
-      accentColor: 'rose',
-      number: '01',
-    },
-    {
-      title: 'LabourHub',
-      description:
-        'LabourHub connects laborers with job providers. Workers can register and apply for jobs, while employers can post listings and hire suitable candidates.',
-      image: 'labour.png',
-      techStack: [
-        { icon: FaReact, name: 'React', color: 'text-blue-500' },
-        { icon: FaCss3Alt, name: 'CSS3', color: 'text-blue-600' },
-        { icon: FaHtml5, name: 'HTML5', color: 'text-orange-600' },
-      ],
-      liveLink: 'https://eduadi-demo.com',
-      githubLink: 'https://github.com/yourusername/eduadi',
-      gradient: 'from-indigo-500 to-pink-500',
-      accentColor: 'indigo',
-      number: '02',
-    },
-  ]
+  const visibleProjects = filterProjects(PROJECTS, activeCategory)
+
+  useEffect(() => {
+    if (!selectedProject) return
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSelectedProject(null)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [selectedProject])
 
   return (
-    <section id="projects" className="py-24 bg-white/50 dark:bg-gray-900/50 relative overflow-hidden">
-
-      {/* Background — exact same as Hero */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <motion.div
-          animate={{ x: [0, 60, 0], y: [0, -40, 0], scale: [1, 1.2, 1] }}
-          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -top-32 -left-32 w-96 h-96 bg-rose-400/20 dark:bg-rose-500/10 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ x: [0, -40, 0], y: [0, 60, 0], scale: [1.2, 1, 1.2] }}
-          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-          className="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-indigo-400/20 dark:bg-indigo-500/10 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ x: [0, 30, 0], y: [0, 30, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-violet-400/10 dark:bg-violet-500/5 rounded-full blur-3xl"
-        />
-      </div>
-      <Particles />
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.1 }}
-        >
-
-          {/* Section Title */}
-          <motion.div variants={fadeIn('up', 0.2)} className="text-center mb-20">
-            <motion.span
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-rose-500/10 to-indigo-500/10 border border-rose-500/20 dark:border-indigo-500/30 text-sm font-semibold text-rose-600 dark:text-indigo-400 mb-6"
-            >
-              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-              My Work
-            </motion.span>
-            <h2 className="text-5xl sm:text-6xl font-black gradient-text mb-4">
-              Projects
-            </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-rose-500 to-indigo-600 mx-auto rounded-full" />
-            <p className="mt-6 text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-base">
-              A selection of things I've built — from full-stack apps to polished UI experiences.
+    <section
+      id="projects"
+      className="relative py-20 lg:py-24 border-t border-zinc-200/70 dark:border-zinc-800/70"
+    >
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Section Header + Interactive Filter Controls */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="space-y-2 max-w-2xl">
+            <p className="text-xs font-medium tracking-wide text-copper-600 dark:text-copper-400">
+              Selected Works
             </p>
-          </motion.div>
-
-          {/* Projects Grid */}
-          <div className="grid md:grid-cols-2 gap-8">
-            {projects.map((project, index) => (
-              <motion.div
-                key={index}
-                variants={fadeIn('up', index * 0.2)}
-                onHoverStart={() => setHoveredIndex(index)}
-                onHoverEnd={() => setHoveredIndex(null)}
-                whileHover={{ y: -8 }}
-                className="group relative bg-white dark:bg-gray-800/60 backdrop-blur-sm rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl border border-gray-100 dark:border-white/10 hover:border-rose-200 dark:hover:border-indigo-500/30 transition-all duration-500"
-              >
-                {/* Project number watermark */}
-                <div className="absolute top-4 right-5 text-7xl font-black text-gray-100 dark:text-white/5 select-none pointer-events-none z-0 leading-none">
-                  {project.number}
-                </div>
-
-                {/* Gradient top bar */}
-                <div className={`h-1 w-full bg-gradient-to-r ${project.gradient}`} />
-
-                {/* Image area */}
-                <div className="relative h-56 overflow-hidden">
-                  <motion.img
-                    src={project.image}
-                    alt={project.title}
-                    animate={{ scale: hoveredIndex === index ? 1.08 : 1 }}
-                    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="w-full h-full object-cover"
-                  />
-
-                  {/* Gradient overlay always present, intensifies on hover */}
-                  <motion.div
-                    animate={{ opacity: hoveredIndex === index ? 1 : 0.4 }}
-                    transition={{ duration: 0.3 }}
-                    className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent`}
-                  />
-
-                  {/* Action buttons — slide up on hover */}
-                  <AnimatePresence>
-                    {hoveredIndex === index && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                        className="absolute bottom-5 left-0 right-0 flex justify-center gap-4 px-6"
-                      >
-                        <motion.a
-                          href={project.liveLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white relative overflow-hidden"
-                        >
-                          <span className={`absolute inset-0 bg-gradient-to-r ${project.gradient}`} />
-                          <motion.span
-                            animate={{ x: ['-100%', '200%'] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: 'linear', repeatDelay: 1 }}
-                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-                          />
-                          <FaExternalLinkAlt className="relative z-10 text-xs" />
-                          <span className="relative z-10">Visit App</span>
-                        </motion.a>
-
-                        <motion.a
-                          href={project.githubLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-bold text-white hover:bg-white/20 transition-colors"
-                        >
-                          <FaGithub className="text-sm" />
-                          <span>GitHub</span>
-                        </motion.a>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Content */}
-                <div className="relative z-10 p-7 space-y-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <h3 className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
-                      {project.title}
-                    </h3>
-                    {/* Arrow icon */}
-                    <motion.div
-                      animate={{ x: hoveredIndex === index ? 4 : 0, opacity: hoveredIndex === index ? 1 : 0.4 }}
-                      transition={{ duration: 0.3 }}
-                      className={`flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br ${project.gradient} flex items-center justify-center text-white text-sm shadow-lg`}
-                    >
-                      →
-                    </motion.div>
-                  </div>
-
-                  <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                    {project.description}
-                  </p>
-
-                  {/* Tech stack pills */}
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {project.techStack.map((tech, techIndex) => (
-                      <motion.div
-                        key={techIndex}
-                        whileHover={{ scale: 1.1, y: -2 }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-700/60 border border-gray-100 dark:border-white/10 rounded-xl text-xs font-semibold`}
-                      >
-                        <tech.icon className={`text-sm ${tech.color}`} />
-                        <span className="text-gray-600 dark:text-gray-300">{tech.name}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+            <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-balance">
+              Engineered products with spatial depth.
+            </h2>
+            <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-300">
+              Move across each card for 3D perspective inspection or open a full case study breakdown.
+            </p>
           </div>
 
-          {/* Bottom CTA */}
-          <motion.div
-            variants={fadeIn('up', 0.5)}
-            className="mt-16 text-center"
+          <div
+            role="group"
+            aria-label="Filter projects by category"
+            className="inline-flex items-center gap-1 p-1 rounded-lg bg-white/90 dark:bg-obsidian-900/90 border border-zinc-200 dark:border-zinc-800 self-start md:self-auto"
           >
-            <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">Want to see more of my work?</p>
-            <motion.a
-              href="https://github.com/Arunsaini07"
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-white font-bold relative overflow-hidden group shadow-lg shadow-rose-500/20"
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-rose-500 to-indigo-600" />
-              <motion.span
-                animate={{ x: ['-100%', '200%'] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'linear', repeatDelay: 1.5 }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-              />
-              <FaGithub className="relative z-10 text-lg" />
-              <span className="relative z-10">View All on GitHub</span>
-              <motion.span
-                animate={{ x: [0, 4, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="relative z-10"
+            {PROJECT_CATEGORIES.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => setActiveCategory(category)}
+                aria-pressed={activeCategory === category}
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-colors duration-150 whitespace-nowrap shrink-0 ${
+                  activeCategory === category
+                    ? 'bg-zinc-900 text-white dark:bg-copper-500 dark:text-obsidian-950'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                }`}
               >
-                →
-              </motion.span>
-            </motion.a>
-          </motion.div>
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        </motion.div>
+        {/* 2-Column Interactive 3D Card Grid */}
+        <div className="grid md:grid-cols-2 gap-8">
+          {visibleProjects.map((project, index) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              index={index}
+              onInspect={setSelectedProject}
+            />
+          ))}
+        </div>
+
+        {/* Quiet Archive Link */}
+        <div className="mt-12 pt-8 border-t border-zinc-200/80 dark:border-zinc-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            Additional repositories, algorithmic solutions, and frontend experiments live on GitHub.
+          </p>
+          <a
+            href="https://github.com/Arunsaini07"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100 hover:text-copper-600 dark:hover:text-copper-400 transition-colors duration-150 whitespace-nowrap shrink-0"
+          >
+            <FaGithub size={15} aria-hidden="true" />
+            <span>View All on GitHub</span>
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
       </div>
+
+      {/* Case Study Lightbox Modal */}
+      {selectedProject && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="case-study-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/75"
+          onClick={() => setSelectedProject(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-alabaster-50 dark:bg-obsidian-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl"
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
+              <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                <span className="font-mono tabular-nums">{selectedProject.index}</span>{' '}
+                <span aria-hidden="true">·</span> {selectedProject.category}{' '}
+                <span aria-hidden="true">·</span> {selectedProject.year}
+              </p>
+              <button
+                type="button"
+                onClick={() => setSelectedProject(null)}
+                aria-label="Close case study modal"
+                className="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-copper-500 hover:text-copper-500 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div className="aspect-[16/9] rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-obsidian-950">
+                <img
+                  src={selectedProject.image}
+                  alt={selectedProject.title}
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <h3
+                  id="case-study-title"
+                  className="font-display text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100"
+                >
+                  {selectedProject.title}
+                </h3>
+                <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                  {selectedProject.architecture}
+                </p>
+              </div>
+
+              <div className="space-y-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+                <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                  Key Implementation Highlights
+                </h4>
+                <ul className="space-y-2">
+                  {selectedProject.highlights.map((item) => (
+                    <li
+                      key={item}
+                      className="text-sm text-zinc-700 dark:text-zinc-300 flex items-start gap-2.5"
+                    >
+                      <span className="text-copper-500 font-bold" aria-hidden="true">
+                        —
+                      </span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
+                  {selectedProject.techStack.join(' · ')}
+                </p>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={selectedProject.liveLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900 text-white dark:bg-copper-500 dark:text-obsidian-950 text-xs font-semibold hover:opacity-90 transition-opacity whitespace-nowrap shrink-0"
+                  >
+                    <FaExternalLinkAlt size={11} aria-hidden="true" />
+                    <span>Visit App</span>
+                  </a>
+                  <a
+                    href={selectedProject.githubLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-semibold hover:border-copper-500 transition-colors whitespace-nowrap shrink-0"
+                  >
+                    <FaGithub size={13} aria-hidden="true" />
+                    <span>Source Code</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

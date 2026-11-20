@@ -1,222 +1,131 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 
-const Navbar = () => {
+const NAV_LINKS = [
+  { label: 'Home', href: '#home' },
+  { label: 'Projects', href: '#projects' },
+  { label: 'Capabilities', href: '#skills' },
+  { label: 'Contact', href: '#contact' },
+]
+
+const Navbar = ({ darkMode, onToggleTheme }) => {
   const [scrolled, setScrolled] = useState(false)
-  const [activeSection, setActiveSection] = useState('home')
   const [menuOpen, setMenuOpen] = useState(false)
-  const [hoveredLink, setHoveredLink] = useState(null)
-  const [darkMode, setDarkMode] = useState(false)
-
-  const navLinks = ['Home', 'Projects', 'Skills', 'Contact']
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const onScroll = () => setScrolled(window.scrollY > 16)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }, [darkMode])
-
   return (
-    <>
-      <motion.nav
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
-            ? 'py-3'
-            : 'py-5'
-        }`}
-      >
-        {/* Background blur layer */}
-        <motion.div
-          animate={{
-            opacity: scrolled ? 1 : 0,
-          }}
-          transition={{ duration: 0.3 }}
-          className="absolute inset-0 bg-white/70 dark:bg-gray-950/80 backdrop-blur-xl border-b border-white/20 dark:border-white/10 shadow-lg shadow-black/5"
-        />
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-200 ${
+        scrolled
+          ? 'bg-alabaster-50/95 dark:bg-obsidian-950/95 border-b border-zinc-200 dark:border-zinc-800'
+          : 'bg-alabaster-50/80 dark:bg-obsidian-950/80 border-b border-transparent'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
+        {/* Zone 1: Single-element Brand Wordmark */}
+        <a
+          href="#home"
+          className="font-display text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-500 rounded-sm"
+        >
+          Arun Saini
+        </a>
 
-        <div className="relative max-w-7xl mx-auto px-6 flex items-center justify-between">
-
-          {/* Logo */}
-          <motion.a
-            href="#home"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-3 group"
+        {/* Zone 2: Concise single-line navigation links + theme switch to the right of Contact */}
+        <nav aria-label="Primary" className="hidden md:flex items-center gap-8">
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 border-b border-transparent hover:border-copper-500 py-1 transition-colors duration-150 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-500 rounded-sm"
+            >
+              {link.label}
+            </a>
+          ))}
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            aria-label={darkMode ? 'Switch to light theme' : 'Switch to dark theme'}
+            className="inline-flex items-center px-3.5 py-1.5 rounded-lg bg-white/90 dark:bg-obsidian-900/90 border border-zinc-300 dark:border-zinc-700 text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:border-copper-500 transition-colors duration-150 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-500"
           >
-            <div className="relative">
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                className="absolute inset-0 rounded-xl bg-gradient-to-br from-rose-500 via-pink-500 to-indigo-600 blur-sm opacity-70 group-hover:opacity-100 transition-opacity"
-              />
-              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 via-pink-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                <span className="text-white font-black text-lg tracking-tight">A</span>
-              </div>
-            </div>
-            <div className="flex flex-col leading-none">
-              <span className="font-black text-gray-900 dark:text-white text-lg tracking-tight">Arun</span>
-              <span className="text-[10px] font-medium text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-indigo-500 tracking-widest uppercase">Portfolio</span>
-            </div>
-          </motion.a>
+            {darkMode ? 'Light Mode' : 'Dark Mode'}
+          </button>
+        </nav>
 
-          {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link, i) => (
-              <motion.a
-                key={link}
-                href={`#${link.toLowerCase()}`}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * i + 0.3, duration: 0.5 }}
-                onHoverStart={() => setHoveredLink(link)}
-                onHoverEnd={() => setHoveredLink(null)}
-                onClick={() => setActiveSection(link.toLowerCase())}
-                className="relative px-5 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 rounded-xl group"
-              >
-                {/* Hover background */}
-                <AnimatePresence>
-                  {hoveredLink === link && (
-                    <motion.span
-                      layoutId="navHover"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute inset-0 bg-gray-100 dark:bg-white/10 rounded-xl"
-                    />
-                  )}
-                </AnimatePresence>
+        {/* Zone 3: Single Primary Action */}
+        <div className="flex items-center gap-3 shrink-0">
+          <a
+            href="#contact"
+            className="hidden md:inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg bg-zinc-900 text-zinc-50 hover:bg-copper-600 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-copper-400 transition-colors duration-150 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-500"
+          >
+            Get in Touch
+          </a>
 
-                {/* Active indicator */}
-                {activeSection === link.toLowerCase() && (
-                  <motion.span
-                    layoutId="navActive"
-                    className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-gradient-to-r from-rose-500 to-indigo-500"
-                  />
-                )}
-
-                <span className="relative z-10">{link}</span>
-              </motion.a>
-            ))}
-          </div>
-
-          {/* Right Side */}
-          <div className="flex items-center gap-3">
-            {/* Dark mode toggle */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setDarkMode(!darkMode)}
-              className="relative w-12 h-6 rounded-full bg-gray-200 dark:bg-indigo-900 transition-colors duration-300 flex items-center px-1"
-            >
-              <motion.div
-                animate={{ x: darkMode ? 24 : 0 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                className="w-4 h-4 rounded-full bg-white shadow-md flex items-center justify-center text-[8px]"
-              >
-                {darkMode ? '🌙' : '☀️'}
-              </motion.div>
-            </motion.button>
-
-            {/* CTA Button */}
-            <motion.a
-              href="#contact"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.7, duration: 0.4 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white relative overflow-hidden group"
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-rose-500 to-indigo-600" />
-              <motion.span
-                animate={{ x: ['100%', '-100%'] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-              />
-              <span className="relative z-10">Let's Talk</span>
-              <span className="relative z-10 text-xs">→</span>
-            </motion.a>
-
-            {/* Mobile menu button */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/10 flex flex-col items-center justify-center gap-1.5"
-            >
-              <motion.span
-                animate={{ rotate: menuOpen ? 45 : 0, y: menuOpen ? 6 : 0 }}
-                className="w-5 h-0.5 bg-gray-800 dark:bg-white rounded-full block"
-              />
-              <motion.span
-                animate={{ opacity: menuOpen ? 0 : 1, scaleX: menuOpen ? 0 : 1 }}
-                className="w-5 h-0.5 bg-gray-800 dark:bg-white rounded-full block"
-              />
-              <motion.span
-                animate={{ rotate: menuOpen ? -45 : 0, y: menuOpen ? -6 : 0 }}
-                className="w-5 h-0.5 bg-gray-800 dark:bg-white rounded-full block"
-              />
-            </motion.button>
-          </div>
+          <button
+            type="button"
+            aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((prev) => !prev)}
+            className="md:hidden w-11 h-11 inline-flex flex-col items-center justify-center gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-500"
+          >
+            <span
+              className={`w-5 h-0.5 bg-current transition-transform duration-150 ${
+                menuOpen ? 'rotate-45 translate-y-2' : ''
+              }`}
+            />
+            <span
+              className={`w-5 h-0.5 bg-current transition-opacity duration-150 ${
+                menuOpen ? 'opacity-0' : ''
+              }`}
+            />
+            <span
+              className={`w-5 h-0.5 bg-current transition-transform duration-150 ${
+                menuOpen ? '-rotate-45 -translate-y-2' : ''
+              }`}
+            />
+          </button>
         </div>
-      </motion.nav>
+      </div>
 
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed top-20 left-4 right-4 z-40 bg-white/90 dark:bg-gray-900/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/30 dark:border-white/10 p-4 md:hidden"
-          >
-            {navLinks.map((link, i) => (
-              <motion.a
-                key={link}
-                href={`#${link.toLowerCase()}`}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.07 }}
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-between px-4 py-3.5 rounded-xl text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-100 dark:hover:bg-white/10 transition-colors group"
-              >
-                <span>{link}</span>
-                <motion.span
-                  animate={{ x: [0, 4, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
-                  className="text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  →
-                </motion.span>
-              </motion.a>
-            ))}
-            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-white/10">
+      {/* Mobile Dropdown Navigation */}
+      {menuOpen && (
+        <div className="md:hidden bg-alabaster-50 dark:bg-obsidian-950 border-b border-zinc-200 dark:border-zinc-800 px-6 py-4">
+          <nav aria-label="Mobile" className="flex flex-col gap-2">
+            {NAV_LINKS.map((link) => (
               <a
-                href="#contact"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-rose-500 to-indigo-600"
+                key={link.label}
+                href={link.href}
                 onClick={() => setMenuOpen(false)}
+                className="py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-copper-500 border-b border-zinc-100 dark:border-zinc-900 last:border-b-0"
               >
-                Let's Talk →
+                {link.label}
               </a>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                onToggleTheme?.()
+                setMenuOpen(false)
+              }}
+              aria-label={darkMode ? 'Switch to light theme' : 'Switch to dark theme'}
+              className="mt-2 inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg bg-white/90 dark:bg-obsidian-900/90 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200"
+            >
+              {darkMode ? 'Light Mode' : 'Dark Mode'}
+            </button>
+            <a
+              href="#contact"
+              onClick={() => setMenuOpen(false)}
+              className="mt-2 inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950"
+            >
+              Get in Touch
+            </a>
+          </nav>
+        </div>
+      )}
+    </header>
   )
 }
 
