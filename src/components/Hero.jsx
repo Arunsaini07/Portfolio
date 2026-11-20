@@ -101,7 +101,7 @@ const Hero = () => {
               <div className="flex items-center gap-3 pt-1">
                 <span className="w-8 h-px bg-copper-500 shrink-0" aria-hidden="true" />
                 <p className="text-sm sm:text-base font-medium text-zinc-700 dark:text-zinc-300">
-                  {PROFILE.name}{' '}
+                  {PROFILE.firstName}{' '}
                   <span className="text-zinc-400 dark:text-zinc-600 mx-1.5" aria-hidden="true">
                     /
                   </span>
@@ -217,7 +217,7 @@ const Hero = () => {
                   {!portraitFailed ? (
                     <img
                       src={portraitSrc}
-                      alt="Arun Saini portrait"
+                      alt="Arun portrait"
                       referrerPolicy="no-referrer"
                       onError={() => {
                         if (portraitSrc === PROFILE.portraitSrc) {
@@ -244,7 +244,7 @@ const Hero = () => {
                 <div className="mt-3.5 pt-3 px-1 border-t border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-between gap-4">
                   <div>
                     <p className="font-display text-base font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
-                      {PROFILE.name}
+                      {PROFILE.firstName}
                     </p>
                     <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
                       Frontend Developer &amp; UI/UX Designer

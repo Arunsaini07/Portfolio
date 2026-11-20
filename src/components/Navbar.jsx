@@ -32,7 +32,7 @@ const Navbar = ({ darkMode, onToggleTheme }) => {
           href="#home"
           className="font-display text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-500 rounded-sm"
         >
-          Arun Saini
+          Arun
         </a>
 
         {/* Zone 2: Concise single-line navigation links + theme switch to the right of Contact */}
